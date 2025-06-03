@@ -62,51 +62,38 @@ export function chatStream(
 export async function clearSessionOnServer(sessionId: string) {
   await fetch(`/api/memory/${sessionId}`, { method: "DELETE" });
 }
+// 模板相关接口
 
-/* ---------- Prompt Template APIs ---------- */
+export async function listTemplates() {
+  const res = await fetch("/api/template", { method: "GET" });
+  return res.json(); // [{ name, version, desc }]
+}
 
-export interface Template {
+export async function getTemplate(name: string, version?: number) {
+  const url = version
+    ? `/api/template/${name}/${version}`
+    : `/api/template/${name}`;
+  const res = await fetch(url, { method: "GET" });
+  return res.json();
+}
+
+export async function saveTemplate(data: {
   name: string;
   version: number;
   prompt: string;
   system?: string;
-  createdAt?: string;   // 后端返回的时间戳（可选）
-}
-
-/** 列出某个模板的所有版本（若 name 为空则列出全部最新版本） */
-export async function listTemplates(name = ""): Promise<Template[]> {
-  const url = name ? `/api/template/${name}?all=1` : "/api/template";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-/** 获取模板最新版本或指定版本 */
-export async function getTemplate(name: string, ver?: number): Promise<Template> {
-  const url = ver === undefined
-    ? `/api/template/${name}`
-    : `/api/template/${name}/${ver}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-/** 保存（或新建）一个模板版本 */
-export async function saveTemplate(tmpl: Omit<Template, "version" | "createdAt">) {
+  createdAt?: string;
+}) {
   const res = await fetch("/api/template", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(tmpl),
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json() as Promise<Template>;   // 返回含 version 的最新对象
+  return res.json();
 }
 
-/** 删除指定版本；不传 ver 则删除最新版本 */
-export async function deleteTemplate(name: string, ver?: number) {
-  const url = ver === undefined
-    ? `/api/template/${name}`
-    : `/api/template/${name}/${ver}`;
-  const res = await fetch(url, { method: "DELETE" });
-  if (!res.ok) throw new Error(await res.text());
+export async function deleteTemplate(name: string, version: number) {
+  await fetch(`/api/template/${name}/${version}`, { method: "DELETE" });
 }
+
+
