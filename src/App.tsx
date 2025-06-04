@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatPanel from "./components/ChatPanel";
 import TemplateList from "./components/TemplateList";
+import OptimizerPanel from "./components/OptimizerPanel";
 
 export default function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -16,7 +17,7 @@ export default function App() {
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex-1">
-        {hash === "#template" ? <TemplateList /> : <ChatPanel />}
+        {hash === "#template" ? <TemplateList /> : hash === "#optimizer" ? <OptimizerPanel/> : <ChatPanel />}
       </div>
     </div>
   );

@@ -16,3 +16,17 @@ export interface Template {
   system?: string;
   createdAt?: string;   // 后端返回的时间戳（可选）
 }
+
+export interface Variant {
+  provider: string;
+  model: string;
+  tpl: string;        // template name
+  version?: number;
+}
+
+export interface OptResult {
+  best: Variant;
+  scores: Record<string, number>;
+  answers: Record<string, string>;
+  latencies: Record<string, number>;
+}

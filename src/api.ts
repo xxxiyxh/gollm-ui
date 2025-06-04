@@ -1,4 +1,4 @@
-import type { ChatMessage } from "./types";
+import type { ChatMessage, OptResult, Template, Variant } from "./types";
 
 // --------- 非流式（保留，后面 Optimizer 会用到） ---------
 export async function chat(text: string) {
@@ -64,9 +64,11 @@ export async function clearSessionOnServer(sessionId: string) {
 }
 // 模板相关接口
 
-export async function listTemplates() {
-  const res = await fetch("/api/template", { method: "GET" });
-  return res.json(); // [{ name, version, desc }]
+/* ---------------- Template ---------------- */
+
+export async function listTemplates(): Promise<Template[]> {
+  const res = await fetch("/api/template");
+  return res.json();
 }
 
 export async function getTemplate(name: string, version?: number) {
@@ -96,4 +98,17 @@ export async function deleteTemplate(name: string, version: number) {
   await fetch(`/api/template/${name}/${version}`, { method: "DELETE" });
 }
 
+/* ---------------- Optimizer ---------------- */
 
+export async function runOptimizer(
+  variants: Variant[],
+  vars: Record<string, string>,
+): Promise<OptResult> {
+  const res = await fetch("/api/optimizer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ variants, vars }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
