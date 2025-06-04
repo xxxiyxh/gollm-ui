@@ -58,6 +58,7 @@ export default function OptimizerPanel() {
                   <option value="">—</option>
                   <option value="ollama">ollama</option>
                   <option value="openai">openai</option>
+                  <option value="hf">huggingface</option>
                 </select>
               </td>
               <td>
@@ -111,7 +112,7 @@ export default function OptimizerPanel() {
       {result && (
         <table className="w-full mt-4 border">
           <thead className="bg-gray-50">
-            <tr><th>Variant</th><th>Score</th><th>Latency(s)</th></tr>
+            <tr><th>Variant</th><th>Score</th><th>Latency(s)</th><th>Answer</th></tr>
           </thead>
           <tbody>
             {Object.entries(result.scores).map(([key, sc]) => (
@@ -120,6 +121,13 @@ export default function OptimizerPanel() {
                 <td className="px-2 py-1 border-r">{key}</td>
                 <td>{sc.toFixed(2)}</td>
                 <td>{result.latencies[key]?.toFixed(2)}</td>
+                <td>
+                  <details>
+                    <summary className="cursor-pointer text-blue-600 underline">View</summary>
+                    <pre className="whitespace-pre-wrap">{result.answers[key]}</pre>
+                  </details>
+                </td>
+
               </tr>
             ))}
           </tbody>
