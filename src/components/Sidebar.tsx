@@ -49,6 +49,11 @@ export default function Sidebar() {
       >
         💬 返回聊天
       </button>
+      <button
+        className="mt-1 p-3 text-left text-purple-700 hover:bg-gray-100"
+        onClick={() => window.location.hash = "#optimizer"}
+      >📊 Optimizer</button>
+
     </aside>
   );
 }
