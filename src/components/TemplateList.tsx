@@ -38,7 +38,7 @@ export default function TemplateList() {
         onClick={() => { setEditing(null); setShowEditor(true); }}>+ 新建模板</button>
       <table className="w-full">
         <thead><tr>
-          <th>名称</th><th>版本</th><th>描述</th><th>操作</th>
+          <th>名称</th><th>版本</th><th>操作</th>
         </tr></thead>
         <tbody>
           {templates.map(t => (
