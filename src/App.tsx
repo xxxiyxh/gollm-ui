@@ -1,37 +1,35 @@
-import { useState, useEffect } from "react";
-import Topbar         from "./components/Topbar";
-import Sidebar        from "./components/Sidebar";
-import ChatPanel      from "./components/ChatPanel";
-import TemplateList   from "./components/TemplateList";
+// src/App.tsx
+import { useEffect, useState } from "react";
+import Topbar from "./components/Topbar";
+import Sidebar from "./components/Sidebar";
+import ChatPanel from "./components/ChatPanel";
+import TemplateList from "./components/TemplateList";
 import OptimizerPanel from "./components/OptimizerPanel";
 
-export default function App() {
-  /* -------------------------------- 路由：监听 hash -------------------------------- */
-  const [hash, setHash] = useState(window.location.hash);
-
+function useHash() {
+  const [hash, setHash] = useState(() => window.location.hash || "#chat");
   useEffect(() => {
-    const onHashChange = () => setHash(window.location.hash);
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    const fn = () => setHash(window.location.hash || "#chat");
+    window.addEventListener("hashchange", fn);
+    return () => window.removeEventListener("hashchange", fn);
   }, []);
+  return hash;
+}
 
-  /* -------------------------------  布局：Topbar + 主体  ------------------------------ */
+export default function App() {
+  const hash = useHash();               // ← 动态监听
+
+  let page: React.ReactNode;
+  if (hash.startsWith("#template")) page = <TemplateList />;
+  else if (hash.startsWith("#optimizer")) page = <OptimizerPanel />;
+  else page = <ChatPanel />;            // #chat / 其它兜底
+
   return (
     <div className="h-screen flex flex-col">
-      {/* 头部横栏 */}
       <Topbar />
-
-      {/* 主体：左侧 Sidebar + 右侧内容 */}
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-
-        {/* 右侧内容区域 (滚动) */}
-        <main className="flex-1 overflow-y-auto bg-[var(--bg)]">
-          {hash === "#template"   ? <TemplateList   />
-           : hash === "#optimizer" ? <OptimizerPanel />
-           : /* 默认聊天面板 */     <ChatPanel      />
-          }
-        </main>
+      <div className="flex flex-1">
+        <Sidebar />   {/* 传给侧边栏做高亮 */}
+        {page}
       </div>
     </div>
   );

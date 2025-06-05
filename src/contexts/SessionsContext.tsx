@@ -36,10 +36,11 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
   }, [currentId]);
 
   // helpers
-  function createSession() {
+  function createSession() :string{
     const id = crypto.randomUUID();
     setSessions(s => [...s, { id, title: "New Chat", messages: [] }]);
     setCurrentId(id);
+    return id;
   }
 
   function deleteSession(id: string) {
