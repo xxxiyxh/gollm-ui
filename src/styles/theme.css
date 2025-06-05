@@ -1,0 +1,8 @@
+:root{
+  --bg:#F5F7FA; --fg:#111827;
+  --primary:#6366F1; --accent:#14B8A6;
+}
+.dark{
+  --bg:#0E1117; --fg:#E5E7EB;
+  --primary:#8B7BFF; --accent:#06D6A0;
+}
