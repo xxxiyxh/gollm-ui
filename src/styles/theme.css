@@ -12,3 +12,7 @@ body{
   font-family: ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+:root{
+  --hover-scale: 1.04;
+  --hover-shadow: 0 2px 8px rgb(0 0 0 / .08);
+}
