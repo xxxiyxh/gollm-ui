@@ -47,9 +47,9 @@ export default function TemplateList() {
               <td>{t.version}</td>
               <td>
                 <button onClick={() => edit(t.name, t.version)}
-                  className="text-blue-600 px-2">编辑</button>
+                  className="text-blue-600 px-2 hover:bg-primary/10 active:scale-95">编辑</button>
                 <button onClick={() => onDelete(t.name, t.version)}
-                  className="text-red-600 px-2">删除</button>
+                  className="text-red-600 px-2 hover:bg-primary/10 active:scale-95">删除</button>
               </td>
             </tr>
           ))}

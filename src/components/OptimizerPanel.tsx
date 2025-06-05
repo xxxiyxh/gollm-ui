@@ -99,7 +99,7 @@ export default function OptimizerPanel() {
                   onChange={e => setVarsJson(e.target.value)} />
       </div>
 
-      <button className="bg-green-600 text-white px-4 py-1 rounded disabled:opacity-60"
+      <button className="bg-green-600 text-white px-4 py-1 rounded disabled:opacity-60 transition active:scale-95 shadow-sm"
               disabled={running || rows.length < 2}
               onClick={run}>
         {running ? "Running..." : "Run Compare"}

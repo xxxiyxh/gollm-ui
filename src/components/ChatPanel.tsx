@@ -5,7 +5,10 @@ import { useSessions } from "../contexts/SessionsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Send, X, Plus, Loader2 } from "lucide-react";
+import { Send, X, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+
 
 import clsx from "clsx";
 import type { ChatMessage } from "../types";
@@ -15,7 +18,7 @@ export default function ChatPanel() {
     sessions,
     currentId,
     setCurrentId,
-    createSession,
+    
     pushUserMsg,
     appendDelta,
     finishAssistant,
@@ -27,6 +30,7 @@ export default function ChatPanel() {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const stopRef   = useRef<() => void>(() => {});
+  const composing = useRef(false);      
 
   // 根据 hash 切换会话
   useEffect(() => {
@@ -78,7 +82,7 @@ export default function ChatPanel() {
           Session <span className="text-gray-400">{session.id.slice(0, 8)}</span>
         </div>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             title="New Chat"
@@ -88,16 +92,18 @@ export default function ChatPanel() {
             }}
           >
             <Plus className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Clear"
-            onClick={clearCurrent}
-            className="text-red-600"
-          >
-            Clear
-          </Button>
+          </Button> */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Clear"
+              onClick={clearCurrent}
+              className="text-red-600 cursor-pointer transition"
+            >
+                Clear
+            </Button>
+          </motion.div>
         </div>
       </div>
 
@@ -126,33 +132,55 @@ export default function ChatPanel() {
           <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
+            onCompositionStart={() => (composing.current = true)}
+            onCompositionEnd={() => (composing.current = false)}
             rows={1}
             placeholder="Message…"
             className="flex-1 resize-none bg-transparent focus-visible:ring-0"
             onKeyDown={e => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                send();
+                return;
+              }
+
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !composing.current
+              ) {
                 e.preventDefault();
                 send();
               }
             }}
           />
-          <Button
-            size="icon"
-            className="bg-primary text-white disabled:opacity-50"
-            onClick={send}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             disabled={sending}
             title="Send"
+            onClick={send}
+            className="inline-flex items-center justify-center rounded-full bg-black text-white
+                       hover:bg-neutral-800 disabled:bg-gray-200 disabled:text-gray-400
+                       h-10 w-10 transition cursor-pointer"
           >
-            {sending ? <Loader2 className="animate-spin h-4 w-4" /> : <Send className="h-4 w-4" />}
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => stopRef.current?.()}
+            {sending
+              ? <Loader2 className="animate-spin h-4 w-4" strokeWidth={2} />
+              : <Send className="h-4 w-4" strokeWidth={2} />
+            }
+          </motion.button>
+
+          <motion.button
+            whileHover={{ rotate: 90 }}
+            whileTap={{ scale: 0.95 }}
             title="Stop"
+            onClick={() => stopRef.current?.()}
+            className="inline-flex items-center justify-center rounded-full border border-gray-300
+                       text-gray-800 hover:bg-gray-100 h-10 w-10 transition cursor-pointer"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </motion.button>
+
         </CardContent>
       </Card>
     </div>
