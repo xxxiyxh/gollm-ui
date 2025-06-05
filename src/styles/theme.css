@@ -6,3 +6,9 @@
   --bg:#0E1117; --fg:#E5E7EB;
   --primary:#8B7BFF; --accent:#06D6A0;
 }
+body{
+  background: var(--bg);
+  color:       var(--fg);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
