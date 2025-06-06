@@ -8,59 +8,179 @@ import {
 import TemplateEditor from "./TemplateEditor";
 import type { Template } from "../types";
 
+import {
+  Card,
+  CardHeader,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionContent,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+
+
 export default function TemplateList() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [editing, setEditing] = useState<Template | null>(null);
-  const [showEditor, setShowEditor] = useState(false);
+  const [search, setSearch] = useState("");
+  const [openEditor, setOpenEditor] = useState(false);
 
   async function refresh() {
     setTemplates(await listTemplates());
   }
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+  }, []);
 
-  async function edit(name: string, version: number) {
+  async function handleEdit(name: string, version: number) {
     setEditing(await getTemplate(name, version));
-    setShowEditor(true);
+    setOpenEditor(true);
   }
-  async function onDelete(name: string, version: number) {
+
+  async function handleDelete(name: string, version: number) {
     await deleteTemplate(name, version);
+    toast.success("Template deleted");
     refresh();
   }
-  async function onSave(data: Template) {
+
+  async function handleSave(data: Template) {
     await saveTemplate(data);
-    setShowEditor(false);
+    toast.success("Template saved");
+    setOpenEditor(false);
     refresh();
   }
+
+  const groups = templates.reduce<Record<string, Template[]>>((acc, cur) => {
+    (acc[cur.name] ||= []).push(cur);
+    return acc;
+  }, {});
+  const filtered = Object.entries(groups).filter(([name]) =>
+    name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="p-4">
-      <button className="mb-2 bg-blue-600 text-white px-2 py-1 rounded"
-        onClick={() => { setEditing(null); setShowEditor(true); }}>+ 新建模板</button>
-      <table className="w-full">
-        <thead><tr>
-          <th>名称</th><th>版本</th><th>操作</th>
-        </tr></thead>
-        <tbody>
-          {templates.map(t => (
-            <tr key={t.name + t.version}>
-              <td>{t.name}</td>
-              <td>{t.version}</td>
-              <td>
-                <button onClick={() => edit(t.name, t.version)}
-                  className="text-blue-600 px-2 hover:bg-primary/10 active:scale-95">编辑</button>
-                <button onClick={() => onDelete(t.name, t.version)}
-                  className="text-red-600 px-2 hover:bg-primary/10 active:scale-95">删除</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {showEditor &&
-        <TemplateEditor
-          value={editing || undefined}
-          onSave={onSave}
-          onCancel={() => setShowEditor(false)}
-        />}
+    <div className="p-6 space-y-6 w-full max-w-none">
+      {/* 工具栏 */}
+      <div className="flex items-center gap-3">
+        <Input
+          placeholder="Search template…"
+          className="max-w-xs"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <motion.button
+          whileHover={{ y: -2, scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          onClick={() => {
+            setEditing(null);
+            setOpenEditor(true);
+          }}
+          className="px-4 py-2 bg-primary text-black rounded-md shadow hover:shadow-lg cursor-pointer transition"
+        >
+          ＋ New Template
+        </motion.button>
+
+      </div>
+
+      {/* 卡片列表 */}
+      <div
+        className="grid gap-4 w-full"
+        style={{
+          gridTemplateColumns:
+            templates.length <= 6
+              ? `repeat(${templates.length}, minmax(12rem, 1fr))`
+              : `repeat(auto-fit, minmax(12rem, 1fr))`,
+        }}
+      >
+
+        {filtered.map(([name, vers]) => (
+          <Card key={name} className="shadow-md relative">
+            {/* 卡片头部 */}
+            <CardHeader className="relative pb-2">
+              <h3 className="font-semibold text-lg pr-16 truncate">{name}</h3>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.1 }}
+                className="absolute top-2 right-2 text-sm border border-gray-300 px-2 py-1 rounded-md bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 cursor-pointer transition"
+                onClick={() => handleEdit(name, vers.at(-1)!.version)}
+              >
+                Edit
+              </motion.button>
+
+            </CardHeader>
+
+            {/* 卡片内容 */}
+            <CardContent className="text-sm space-y-2">
+              <div>Latest v{vers.at(-1)!.version}</div>
+              <Accordion type="single" collapsible>
+                <AccordionItem value="versions">
+                  <AccordionTrigger className="text-xs cursor-pointer transition">Versions</AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-1 text-sm">
+                      {vers
+                        .sort((a, b) => b.version - a.version)
+                        .map((v) => (
+                          <li key={v.version} className="flex justify-between">
+                            <span>v{v.version}</span>
+                            <div className="space-x-1">
+                              <Button
+                                size="sm"
+                                variant="link"
+                                className="text-xs px-1 cursor-pointer transition"
+                                onClick={() => handleEdit(name, v.version)}
+                              >
+                                edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="link"
+                                className="text-xs px-1 text-red-600 cursor-pointer transition"
+                                onClick={() => handleDelete(name, v.version)}
+                              >
+                                del
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* 弹出编辑器 */}
+      <Dialog open={openEditor} onOpenChange={setOpenEditor}>
+        <DialogContent className="max-w-3xl bg-white dark:bg-neutral-900 shadow-2xl border border-border">
+          <DialogHeader>
+            {editing
+              ? `Edit ${editing.name} v${editing.version}`
+              : "New Template"}
+          </DialogHeader>
+          <TemplateEditor
+            value={editing || undefined}
+            onSave={handleSave}
+            onCancel={() => setOpenEditor(false)}
+          />
+          <DialogFooter />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

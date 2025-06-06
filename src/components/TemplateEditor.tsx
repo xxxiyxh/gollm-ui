@@ -1,6 +1,8 @@
 import { useState } from "react";
 import MonacoEditor from "@monaco-editor/react";
 import type { Template } from "../types";
+import { motion } from "framer-motion";
+
 
 interface TemplateEditorProps {
   value?: Template;
@@ -8,7 +10,7 @@ interface TemplateEditorProps {
   onCancel: () => void;
 }
 
-export default function TemplateEditor({ value, onSave, onCancel }: TemplateEditorProps) {
+export default function TemplateEditor({ value, onSave }: TemplateEditorProps) {
   const [data, setData] = useState<Template>({
     name: value?.name || "",
     version: value?.version || 1,
@@ -18,9 +20,9 @@ export default function TemplateEditor({ value, onSave, onCancel }: TemplateEdit
   });
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white rounded shadow-xl w-[600px] p-6 space-y-3 relative">
-        <button className="absolute top-2 right-4 text-xl" onClick={onCancel}>×</button>
+    <div className="space-y-3">
+      
+        
         <div className="space-y-2">
           <input className="border p-1 w-1/2"
             placeholder="名称"
@@ -36,10 +38,18 @@ export default function TemplateEditor({ value, onSave, onCancel }: TemplateEdit
         <div>
           <div className="mb-1">Prompt</div>
           <MonacoEditor
-            height="120px"
+            height="60px"
             language="markdown"
             value={data.prompt}
-            onChange={(v: string | undefined) => setData(d => ({ ...d, prompt: v || "" }))}
+            options={{
+              lineNumbers:"off",
+              minimap:{ enabled: false },
+              scrollBeyondLastLine: false,
+              wordWrap: "on",
+              padding: { top: 4, bottom: 4 },
+              fontSize: 14,
+            }}
+            onChange={(v: string | undefined) => setData(d => ({ ...d, system: v || "" }))}
           />
         </div>
         <div>
@@ -48,14 +58,27 @@ export default function TemplateEditor({ value, onSave, onCancel }: TemplateEdit
             height="60px"
             language="markdown"
             value={data.system}
+            options={{
+              lineNumbers:"off",
+              minimap:{ enabled: false },
+              scrollBeyondLastLine: false,
+              wordWrap: "on",
+              padding: { top: 4, bottom: 4 },
+              fontSize: 14,
+            }}
             onChange={(v: string | undefined) => setData(d => ({ ...d, system: v || "" }))}
           />
         </div>
-        <button className="bg-blue-600 text-white px-4 py-1 rounded"
-          onClick={() => onSave(data)}>
-          保存
-        </button>
-      </div>
+        <motion.button
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="bg-blue-600 text-white px-4 py-1 rounded shadow hover:bg-blue-700 cursor-pointer transition"
+            onClick={() => onSave(data)}
+          >
+            保存
+        </motion.button>
+      
     </div>
   );
 }
